@@ -22,3 +22,10 @@ def check_dir(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     return(path)
 
+def remove_files(path: Path, file_list: list[str]):
+    for file in file_list:
+        file_for_removal = Path(path / file)
+        file_for_removal.unlink()
+    print("Removing temporary files..")
+
+

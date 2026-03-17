@@ -1,0 +1,16 @@
+[project]
+name = "vasp-helper"
+version = "0.1.0"
+description = "A group of scripts that create input files and preform some post-processing steps."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pandas"]
+
+[project.scripts]
+vasphelper = "vasphelper.vasp_helper:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

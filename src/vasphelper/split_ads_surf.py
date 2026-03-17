@@ -3,8 +3,8 @@ from shutil import copy2
 import pandas as pd
 from pathlib import Path
 import argparse
-import file_manager as fm
-import vasp_file_manager as vfm
+from vasphelper import file_manager as fm
+from vasphelper import vasp_file_manager as vfm
 from typing import Any
 
 """
@@ -107,6 +107,8 @@ def run_fc_split_ads_surf(calc_type: str, split_type: str, num_ads: int):
     split_targets = SPLIT_DISPATCH[split_type]
     calc_handler = CALC_DISPATCH[calc_type]
 
+    contcar_list = ["CONTCAR_" + case for case in case_list]
+
     for target in split_targets:
         dir_path = fm.check_dir(CUR_DIR / target)
         atom_list: dict[str, str] = vfm.create_contcars(num_ads, case_list, dir_path, CUR_DIR)
@@ -115,6 +117,8 @@ def run_fc_split_ads_surf(calc_type: str, split_type: str, num_ads: int):
 
         total = vfm.write_calcfile(dir_path, dir_list)
         print(f"Total Directories made for {dir_path.name}:  {total}")
+
+        fm.remove_files(dir_path, contcar_list)
 
 def main():
     parser = argparse.ArgumentParser(description=f"""Split CONTCAR into surface and adsorbant CONTCARs and makes files for one of the follow analyses:

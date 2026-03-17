@@ -1,0 +1,43 @@
+# -------------------------
+# Virtual environments
+# -------------------------
+venv/
+venv_linux/
+.venv/
+env/
+ENV/
+
+# -------------------------
+# Python cache and compiled files
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# -------------------------
+# Build artifacts
+# -------------------------
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+
+# -------------------------
+# IDE / editor files
+# -------------------------
+.vscode/
+.idea/
+*.swp
+
+# -------------------------
+# OS-specific files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Packaging metadata inside src/
+# -------------------------
+src/**/vasp_helper.egg-info/

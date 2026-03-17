@@ -1,7 +1,7 @@
 
 from shutil import copyfileobj
 from pathlib import Path
-import file_manager as fm
+from vasphelper import file_manager as fm
 
 
 def potcar_concatentate(atom_list: list[str], src: Path, dest: Path) -> None:
@@ -47,7 +47,6 @@ def create_contcars(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path
         total_species: int  = len(atom_types)
         atom_total: int = sum(atom_nums)
         num_line: str = ''
-        print(dir_name)
         xyz: list[str] = []
         if dir_name.name == 'surf':
             xyz = contcar_cont[9:(9 + surf_total)]
@@ -67,7 +66,7 @@ def create_contcars(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path
         cont_file_format: str = '\n'.join(['\n'.join(contcar_cont[:5]), "    ".join(atom_types), num_line, contcar_cont[7], contcar_cont[8], '\n'.join(xyz)])
         fm.write_text(cont_file_format, cur_dir / dir_name / f'CONTCAR_{entry}')
     
-    print(f'Updating CONTCARs for {dir_name}...')
+    print(f'Updating CONTCARs for {dir_name.name}...')
     return atom_dic
 
 def populate_vasp_dirs(cur_dir: Path, dir_path: Path, directory: Path, atom_types: list[str], parameter_dict: dict[str, str]) -> None:

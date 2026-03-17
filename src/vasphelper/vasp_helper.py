@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
-import split_ads_surf
+from vasphelper import split_ads_surf
 from typing import Any
 
 def get_choice(prompt: str, choices: list) -> str:
