@@ -66,6 +66,7 @@ def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parame
     for directory in dir_list:
         rwigs_dir = directory.parent
         incar_parameter_dict['RWIGS']= ' '.join(str(rwigs_list[rwigs_dir.name].get(str(atom),'')) for atom in atom_list[directory.name])
+        incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
         vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
@@ -75,6 +76,7 @@ def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_param
     incar_parameter_dict['LAECHG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
     for directory in dir_list:
+        incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
         vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
     
     return dir_list
@@ -84,6 +86,7 @@ def handle_chg(dir_path: Path, case_list: list[str], num_ads: int, incar_paramet
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
     for directory in dir_list:
+        incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
         vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
     
     return dir_list
@@ -115,10 +118,10 @@ def run_fc_split_ads_surf(calc_type: str, split_type: str, num_ads: int):
         dir_list = calc_handler(dir_path, case_list, num_ads, incar_parameter_dict, atom_list)
         print('Populated all input files into directories...')
 
-        total = vfm.write_calcfile(dir_path, dir_list)
-        print(f"Total Directories made for {dir_path.name}:  {total}")
-
         fm.remove_files(dir_path, contcar_list)
+
+        vfm.write_calcfile(dir_path, dir_list)
+
 
 def main():
     parser = argparse.ArgumentParser(description=f"""Split CONTCAR into surface and adsorbant CONTCARs and makes files for one of the follow analyses:

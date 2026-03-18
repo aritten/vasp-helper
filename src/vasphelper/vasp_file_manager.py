@@ -76,11 +76,11 @@ def populate_vasp_dirs(cur_dir: Path, dir_path: Path, directory: Path, atom_type
     fm.copy_file(dir_path / f'CONTCAR_{directory.name}', directory / 'POSCAR')
 
 
-def write_calcfile(dir_path: Path, dir_list: list[Path]) -> int:
+def write_calcfile(dir_path: Path, dir_list: list[Path]):
     with open(dir_path / "CalcFile.dat", "w") as f:
         total = 0
         for dir in dir_list:
             dir = str(dir)[len(str(dir_path)) + 1:]
             f.write(f"{dir}\n")
             total = total + 1
-    return total
+    print(f"Total Directories made for {dir_path.name}:  {total}")
