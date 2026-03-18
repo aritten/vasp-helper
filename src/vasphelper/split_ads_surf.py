@@ -7,13 +7,6 @@ from vasphelper import file_manager as fm
 from vasphelper import vasp_file_manager as vfm
 from typing import Any
 
-"""
-
-make so it produces files for bader and charge density analysis
-
-Remove CONTCAR
-
-"""
 #####CONSTANTS######
 
 CUR_DIR = Path.cwd()
