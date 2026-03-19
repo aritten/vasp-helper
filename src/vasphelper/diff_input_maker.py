@@ -18,6 +18,8 @@ SPLIT_DISPATCH: dict[str, list[str]]= {
     'all': ['ads', 'surf', 'overall']
 }
 
+######FUNCTIONS######
+
 def create_list_of_cases () -> list[str]:
     data = []
     for file in CUR_DIR.iterdir():
@@ -51,9 +53,38 @@ def build_rwigs_dirs(case_list: list[str], dir_path: Path, rwigs_data: list[str]
     print("Built Case Directories...")
     return dir_list
 
-def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str]) -> list[Path]:
+def get_rwigs_list(unique: set) -> pd.DataFrame:
+    try:
+        return pd.DataFrame(pd.read_csv(CUR_DIR / 'RWIGS_inputs.csv', index_col= 'Type'))
+    except FileNotFoundError:
+        print('RWIGS_inputs.csv not found.')
+        while True: 
+            try: 
+                ratios: list[float] = [float(ratio) for ratio in input('What ratios of default RWIGS values would you like to use?\nRatios: ').split()]
+                break
+            except ValueError:
+                print("Please enter only float values.")
+    
+        rwigs_list = pd.DataFrame(index = list(unique))
+
+        for ratio in ratios:    
+            col_name = f'Ratio_{str(ratio).replace('.', '_')}'
+            for entry in unique:
+                with open(CUR_DIR / f'POTCAR_{entry}' , 'r') as f:
+                    line: int = 17
+                    [next(f) for _ in range(line)]
+                    rwigs_def: float = float(next(f).split()[2].replace(';', ''))
+                
+                rwigs_list.loc[entry, col_name] = rwigs_def * ratio
+        rwigs_list.index.name = 'Type' 
+        rwigs_list.to_csv(CUR_DIR / 'RWIGS_inputs.csv')
+
+    return rwigs_list
+
+
+def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
     print(f'Creating files for PDOS Electon Differential Analysis...')
-    rwigs_list = pd.DataFrame(pd.read_csv(CUR_DIR / "RWIGS_inputs.csv", index_col= "Type"))
+    rwigs_list: pd.DataFrame = get_rwigs_list(unique_atoms)
     incar_parameter_dict['LORBIT'] = '0'
     dir_list: list[Path] = build_rwigs_dirs(case_list, dir_path, rwigs_data=list(rwigs_list.columns))
     for directory in dir_list:
@@ -63,7 +94,7 @@ def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parame
         vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
-def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str]) -> list[Path]:
+def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
     print(f'Creating files for Bader Charge Analysis...')
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     incar_parameter_dict['LAECHG'] = '.TRUE.'
@@ -74,7 +105,7 @@ def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_param
     
     return dir_list
 
-def handle_chg(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str]):
+def handle_chg(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set):
     print(f'Creating files for Charge Density Analysis...')
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
@@ -90,7 +121,7 @@ CALC_DISPATCH: dict[str, Any] = {
     'chg': handle_chg
 }
     
-def run_fc_split_ads_surf(calc_type: str, split_type: str, num_ads: int):
+def run_diff_input_maker(calc_type: str, split_type: str, num_ads: int):
 
     print(f'Progress:\n{"-"*50}\nMaking Case List...')
     case_list = create_list_of_cases()
@@ -100,6 +131,11 @@ def run_fc_split_ads_surf(calc_type: str, split_type: str, num_ads: int):
         'NSW': '0'
     }
 
+    required_files: list[str] = [
+        'INCAR',
+        'KPOINTS',
+    ]
+
     split_targets = SPLIT_DISPATCH[split_type]
     calc_handler = CALC_DISPATCH[calc_type]
 
@@ -107,8 +143,13 @@ def run_fc_split_ads_surf(calc_type: str, split_type: str, num_ads: int):
 
     for target in split_targets:
         dir_path = fm.check_dir(CUR_DIR / target)
-        atom_list: dict[str, str] = vfm.create_contcars(num_ads, case_list, dir_path, CUR_DIR)
-        dir_list = calc_handler(dir_path, case_list, num_ads, incar_parameter_dict, atom_list)
+        atom_dict: dict[str, list[str]] = vfm.create_contcars(num_ads, case_list, dir_path, CUR_DIR)
+
+        unique_atoms = vfm.check_unique_atom_atom_types(atom_dict)
+        required_files += [f'POTCAR_{atom}' for atom in unique_atoms]
+        fm.check_files(CUR_DIR, required_files)
+
+        dir_list = calc_handler(dir_path, case_list, num_ads, incar_parameter_dict, atom_dict, unique_atoms)
         print('Populated all input files into directories...')
 
         fm.remove_files(dir_path, contcar_list)
@@ -136,7 +177,7 @@ This program will not change KPOINTS make sure correct KPOINTS are specified in 
     parser.add_argument("num_ads", help="Specify the number of adsorbates species in CONTCAR. In original CONTCARs, make sure elements that occur in the surface and in the adsorbates are separated in header.", type=int)
     args = parser.parse_args()
 
-    run_fc_split_ads_surf(args.calc_type, args.split_type, args.num_ads)
+    run_diff_input_maker(args.calc_type, args.split_type, args.num_ads)
 
 if __name__ == '__main__':
     main()

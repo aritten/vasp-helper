@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 import argparse
-from vasphelper import split_ads_surf
+from vasphelper import diff_input_maker
 from typing import Any
+from pathlib import Path
 
 def get_choice(prompt: str, choices: list) -> str:
     choice: str = input(prompt).strip()
@@ -45,7 +46,7 @@ Choice: """, ['1', '2', '3', '4'])
         '4': 'all'
     }
     num_ads: int = get_choice_w_type("Enter number of separate adsorbates in POSCAR list: ", int)
-    split_ads_surf.run_fc_split_ads_surf(calc_type_dict[calc_type], split_type_dict[split_type], num_ads)
+    diff_input_maker.run_diff_input_maker(calc_type_dict[calc_type], split_type_dict[split_type], num_ads)
 
 def icore_input() -> None:
     pass

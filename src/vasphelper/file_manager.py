@@ -2,6 +2,8 @@ from shutil import copyfile
 from shutil import copyfileobj
 from shutil import rmtree
 from pathlib import Path
+import os
+import sys
 
 def read_text(file_path: Path, mode:str = 'r') -> list[str]:
     with open(file_path, mode) as f:
@@ -28,4 +30,12 @@ def remove_files(path: Path, file_list: list[str]):
         file_for_removal.unlink()
     print("Removing temporary files..")
 
+def check_files(path: Path, file_required: list[str]):
 
+    dnt_exist = [f for f in file_required if not os.path.exists(path / f)]
+    
+    if dnt_exist:
+        for i in dnt_exist:
+            print(f"Missing File: {i}")
+        raise SystemExit(f"Please put required files into {path.name}")
+    print("All required files present...")

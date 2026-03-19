@@ -4,11 +4,18 @@ from pathlib import Path
 from vasphelper import file_manager as fm
 
 
+def check_unique_atom_atom_types(dictionary: dict[str, list[str]]) -> set:
+    unique = set()
+    for v in dictionary.values():
+        unique.update(v)
+    return unique
+
 def potcar_concatentate(atom_list: list[str], src: Path, dest: Path) -> None:
     with open(dest / 'POTCAR', 'wb') as destination:
         for atom in atom_list:
             with open(src / f'POTCAR_{atom}', 'rb') as source:
                 copyfileobj(source, destination)
+
 
 def change_incar_parameters(source: Path, dest: Path, parameter_dict: dict[str, str]) -> None:
 # change this but works
@@ -30,7 +37,7 @@ def change_incar_parameters(source: Path, dest: Path, parameter_dict: dict[str, 
     
     fm.write_text("".join(content), dest / 'INCAR')
 
-def create_contcars(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path) -> dict[str, str]:
+def create_contcars(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path) -> dict[str, list[str]]:
     
     atom_dic = {}
 
