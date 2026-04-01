@@ -56,7 +56,7 @@ def icore_input() -> None:
         filename: str = input("Enter name of the CONTCAR to use: ")
         if 'CONTCAR' in filename and (Path.cwd() / filename).exists():
             break
-        print('Filename must contain CONTCAR.')
+        print('Filename must contain CONTCAR and be in the currentworking directory.')
 
     calc_type: str = get_choice(f"""
 Does the contcar contain adsorbates?

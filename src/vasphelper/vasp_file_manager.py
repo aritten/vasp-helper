@@ -159,7 +159,7 @@ def change_incar_parameters(source: Path, dest: Path, parameter_dict: dict[str, 
 
 # should this be else where?
 def copy_contcars_diff(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path) -> dict[str, list[str]] | None:
-    atom_dic: dict[str, list[str]]= {}
+    atom_dict: dict[str, list[str]]= {}
 
     print(f'Updating CONTCARs for {dir_name.name}...')
 
@@ -173,9 +173,9 @@ def copy_contcars_diff(num_ads: int, data: list[str], dir_name: Path, cur_dir: P
           
             fm.write_text(split_contcar, dir_name / f'CONTCAR_{entry}')
 
-            atom_dic[entry] = contcar.types
+        atom_dict[entry] = contcar.types
 
-        return atom_dic
+        return atom_dict
 
 def populate_vasp_dirs(cur_dir: Path, contcar_path: Path, directory: Path, atom_types: list[str], parameter_dict: dict[str, str]) -> None:
     change_incar_parameters(cur_dir, directory, parameter_dict)

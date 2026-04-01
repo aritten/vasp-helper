@@ -1,6 +1,6 @@
 # Description
 
-Vasp Helper is a program that handles file creation for a variety of differential analyses:
+Vasp Helper is a program that handles file creation for core level binding shift energy calculations and a variety of differential analyses:
 
 * **Bader Charge Analysis** 
 * **Charge Differential Analysis**
@@ -22,13 +22,8 @@ Then, use pip to install vasp-helper and its dependencies.
 
 ## Future Plans
 
-<<<<<<< HEAD
-This program is a work in progress and the following functions will be added
-=======
 This program is a work in progress and the following functions will be added:
->>>>>>> 41913d9 (	modified:   README.md)
 * Add new modes of file creation
-    * Create files to calculate the core level binding energy shifts
     * Freeze atoms based on position within the super cell
 * Add functionality to allow for post-processing steps
     * Convolute core level binding shift data to produce theoretical XPS spectra
