@@ -2,6 +2,7 @@
 
 import argparse
 from vasphelper import diff_input_maker
+from vasphelper import icore_input_maker
 from typing import Any
 from pathlib import Path
 
@@ -10,7 +11,7 @@ def get_choice(prompt: str, choices: list) -> str:
     while True:
         if choice in choices:
             break
-        choice = input(f'Choice is not included in choices please select from {", ".join(choices)}:\n').strip()
+        choice = input(f'Choice is not included in choices please select from the above list using the corresponding numbers included in: {", ".join(choices)}:\nChoice: ').strip()
     return choice
 
 def get_choice_w_type(prompt: str, cast: Any) -> Any:
@@ -19,7 +20,7 @@ def get_choice_w_type(prompt: str, cast: Any) -> Any:
             choice = cast(input(prompt).strip())
             return choice
         except ValueError:
-            print(f'Please enter input of type {cast}')
+            print(f'Please enter input of type {cast}\nChoice: ')
 
 def diff_input() -> None:
     calc_type: str = get_choice(f"""
@@ -45,11 +46,47 @@ Choice: """, ['1', '2', '3', '4'])
         '3': 'both',
         '4': 'all'
     }
+    #this might be best in subroutine
     num_ads: int = get_choice_w_type("Enter number of separate adsorbates in POSCAR list: ", int)
     diff_input_maker.run_diff_input_maker(calc_type_dict[calc_type], split_type_dict[split_type], num_ads)
 
 def icore_input() -> None:
-    pass
+
+    while True: 
+        filename: str = input("Enter name of the CONTCAR to use: ")
+        if 'CONTCAR' in filename and (Path.cwd() / filename).exists():
+            break
+        print('Filename must contain CONTCAR.')
+
+    calc_type: str = get_choice(f"""
+Does the contcar contain adsorbates?
+1. Yes
+2. No
+Choice: """, ['1', '2'])
+    calc_type_dict: dict[str, str] = {
+        '1': 'ads',
+        '2': 'surf'
+    }
+    if calc_type == '1':
+        num_ads: int = get_choice_w_type("Enter number of separate adsorbates in POSCAR list: ", int)
+        all_atoms: str = get_choice("""Would you like directories for all relaxed atoms within the surface or only specific atoms?
+1. All relaxed atoms
+2. Select atoms
+Choice: """, ['1', '2'])
+        all_atoms_dict: dict[str, bool] = {
+        '1': True,
+        '2': False
+        }
+        if not all_atoms_dict[all_atoms]: 
+            spec_atom_num: int = get_choice_w_type("Enter the atom that directories for core level binding shifts are needed: ", int)
+            num_surr_atoms: int = get_choice_w_type("Enter number of atoms around that atom that need to have directories: ", int)
+            tolerance: float = get_choice_w_type('Enter tolerance across periodic boundary to check for surrounding atoms: ', float)
+            icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, all_atoms=False, num_surr_atoms=num_surr_atoms, aoi=spec_atom_num, tolerance=tolerance)
+        else:
+           icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, all_atoms=True) 
+    else:
+        num_ads: int = 0
+        icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads)
 
 def visualize_doscar() -> None:
     pass
@@ -105,7 +142,7 @@ Post Processing to Visualize Atoms in VESTA
 {'-' * 42}
 Enter number of the option of your choice from below to start program:\n""")    
 
-    user_choice: str = input(f"""{'-' * 15} File Creation Utilities {'-' * 16}
+    user_choice: str = get_choice(f"""{'-' * 15} File Creation Utilities {'-' * 16}
 1. Differential
 2. ICORE (In Progress)
 
@@ -114,7 +151,7 @@ Enter number of the option of your choice from below to start program:\n""")
 4. Color by ___ (In Progress)
 
 0. Exit Program
-Choice: """)
+Choice: """, ['1', '2', '3', '4', '0'])
     handle_function(user_choice)
 
 if __name__ == "__main__":

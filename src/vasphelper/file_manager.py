@@ -28,12 +28,9 @@ def remove_files(path: Path, file_list: list[str]):
     for file in file_list:
         file_for_removal = Path(path / file)
         file_for_removal.unlink()
-    print("Removing temporary files..")
 
 def check_files(path: Path, file_required: list[str]):
-
     dnt_exist = [f for f in file_required if not os.path.exists(path / f)]
-    
     if dnt_exist:
         for i in dnt_exist:
             print(f"Missing File: {i}")

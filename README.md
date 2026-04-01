@@ -22,7 +22,11 @@ Then, use pip to install vasp-helper and its dependencies.
 
 ## Future Plans
 
+<<<<<<< HEAD
 This program is a work in progress and the following functions will be added
+=======
+This program is a work in progress and the following functions will be added:
+>>>>>>> 41913d9 (	modified:   README.md)
 * Add new modes of file creation
     * Create files to calculate the core level binding energy shifts
     * Freeze atoms based on position within the super cell
