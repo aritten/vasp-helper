@@ -174,7 +174,7 @@ def copy_contcars_diff(num_ads: int, data: list[str], dir_name: Path, cur_dir: P
 
         atom_dict[entry] = contcar.types
 
-        return atom_dict
+    return atom_dict
 
 def populate_vasp_dirs(cur_dir: Path, contcar_path: Path, directory: Path, atom_types: list[str], parameter_dict: dict[str, str]) -> None:
     change_incar_parameters(cur_dir, directory, parameter_dict)
