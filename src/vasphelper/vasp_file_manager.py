@@ -164,13 +164,12 @@ def copy_contcars_diff(num_ads: int, data: list[str], dir_name: Path, cur_dir: P
     print(f'Updating CONTCARs for {dir_name.name}...')
 
     for entry in data:
+        contcar: ContcarClass = ContcarClass(cur_dir / f'CONTCAR_{entry}', num_ads)
+        contcar.parse_atomic_data()
         if dir_name.name == 'overall':
             fm.copy_file(cur_dir / f'CONTCAR_{entry}', dir_name / f'CONTCAR_{entry}')
         else:
-            contcar: ContcarClass = ContcarClass(cur_dir / f'CONTCAR_{entry}', num_ads)
-            contcar.parse_atomic_data()
             split_contcar = contcar.create_split_contcar(dir_name.name)
-          
             fm.write_text(split_contcar, dir_name / f'CONTCAR_{entry}')
 
         atom_dict[entry] = contcar.types
