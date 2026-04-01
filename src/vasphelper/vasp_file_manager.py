@@ -158,8 +158,8 @@ def change_incar_parameters(source: Path, dest: Path, parameter_dict: dict[str, 
     fm.write_text("".join(content), dest / 'INCAR')
 
 # should this be else where?
-def copy_contcars_diff(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path) -> dict[str, list[str]] | None:
-    atom_dict: dict[str, list[str]]= {}
+def copy_contcars_diff(num_ads: int, data: list[str], dir_name: Path, cur_dir: Path) -> dict[str, list[str]]:
+    atom_dict: dict[str, list[str]] = {}
 
     print(f'Updating CONTCARs for {dir_name.name}...')
 

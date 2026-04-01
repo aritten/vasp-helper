@@ -17,7 +17,6 @@ from sys import exit
 #####CONSTANTS######
 
 CUR_DIR = Path.cwd()
-PDOS_DIR = dir_path = fm.check_dir(CUR_DIR / 'pdos')
 
 SPLIT_DISPATCH: dict[str, list[str]]= {
     'ads': ['ads'],
@@ -98,7 +97,7 @@ def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parame
         rwigs_dir = directory.parent
         incar_parameter_dict['RWIGS']= ' '.join(str(rwigs_list[rwigs_dir.name].get(str(atom),'')) for atom in atom_list[directory.name])
         incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
-        vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
+        vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
 def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
@@ -107,7 +106,7 @@ def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_param
     dir_list: list[Path] = build_dirs(case_list, dir_path)
     for directory in dir_list:
         incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
-        vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
+        vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
 def handle_chg(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set):
@@ -115,7 +114,7 @@ def handle_chg(dir_path: Path, case_list: list[str], num_ads: int, incar_paramet
     dir_list: list[Path] = build_dirs(case_list, dir_path)
     for directory in dir_list:
         incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
-        vfm.populate_vasp_dirs(CUR_DIR, dir_path, directory, list(atom_list[directory.name]), incar_parameter_dict)
+        vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
 CALC_DISPATCH: dict[str, Any] = {
@@ -138,10 +137,12 @@ def run_diff_input_maker(calc_type: str, split_type: str, num_ads: int):
     #want to move the required files check out here somehow
     split_targets = SPLIT_DISPATCH[split_type]
     calc_handler = CALC_DISPATCH[calc_type]
+
+    diff_dir = dir_path = fm.check_dir(CUR_DIR / calc_type)
     contcar_list = ["CONTCAR_" + case for case in case_list]
     for target in split_targets:
         print(f"Progress for {target}:")
-        dir_path = fm.check_dir(PDOS_DIR / target)
+        dir_path = fm.check_dir(diff_dir / target)
         atom_dict: dict[str, list[str]] = vfm.copy_contcars_diff(num_ads, case_list, dir_path, CUR_DIR)
         unique_atoms = vfm.check_unique_atom_atom_types([item for sublist in atom_dict.values() for item in sublist])
         required_files += [f'POTCAR_{atom}' for atom in unique_atoms]
