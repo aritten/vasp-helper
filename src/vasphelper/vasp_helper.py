@@ -81,9 +81,9 @@ Choice: """, ['1', '2'])
             spec_atom_num: int = get_choice_w_type("Enter the atom that directories for core level binding shifts are needed: ", int)
             num_surr_atoms: int = get_choice_w_type("Enter number of atoms around that atom that need to have directories: ", int)
             tolerance: float = get_choice_w_type('Enter tolerance across periodic boundary to check for surrounding atoms: ', float)
-            icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, all_atoms=False, num_surr_atoms=num_surr_atoms, aoi=spec_atom_num, tolerance=tolerance)
+            icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=True, num_surr_atoms=num_surr_atoms, aoi=spec_atom_num)
         else:
-           icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, all_atoms=True) 
+           icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=False) 
     else:
         num_ads: int = 0
         icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads)

@@ -11,6 +11,8 @@ def read_text(file_path: Path, mode:str = 'r') -> list[str]:
     return data
 
 def write_text(contents: str, file_path: Path, mode: str = 'w') -> None:
+    """
+    Writes text from """
     with open(file_path, mode) as f:
         f.write(contents)
 

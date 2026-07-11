@@ -5,7 +5,7 @@ from vasphelper import file_manager as fm
 from itertools import groupby
 from typing import Any
 from itertools import accumulate
-
+import sys
 
 class ContcarClass:
      
@@ -13,10 +13,10 @@ class ContcarClass:
         self.path: Path = path
         self.num_ads: int = num_ads
         self.raw_content: list[str] = [line.strip('\n') for line in fm.read_text(path)]
-        self.content: list[str] = self.remove_velocity_data(self.raw_content)
-        self.atomic_data, self.xyz = self.split_atomic_data_and_ionic_pos(self.content)
+        self.content: list[str] = self.remove_velocity_data()
+        self.atomic_data, self.xyz = self.split_atomic_data_and_ionic_pos()
 
-    def remove_velocity_data(self, content: list[str]) -> list[str]:
+    def remove_velocity_data(self) -> list[str]:
         """
         Removes velocity data from CONTCAR retaining only data related to lattice parameters, atomic information and ionic positions.
         The delimiter is set at '' as is current convention in VASP for output CONTCARs
@@ -24,26 +24,62 @@ class ContcarClass:
         Args:
             None
         Returns:
-            contcar_contents (list[str]): contains all data relating to lattice parameters, atomic information and ionic positions.
+            contcar_contents (list[str]): contains all data relating to lattice parameters, atomic information and ionic positions
         """
         delimiter: list[str] = [' ', '']
-        return [list(group) for k, group in groupby(content, lambda x: x in delimiter) if not k][0]
+        return [list(group) for k, group in groupby(self.raw_content, lambda x: x in delimiter) if not k][0]
     
-    def split_atomic_data_and_ionic_pos(self, content: list[str]) -> tuple[list[str], list[str]]:
+    def split_atomic_data_and_ionic_pos(self) -> tuple[list[str], list[str]]:
+        """
+        Splits atomic data and ionic positions of a CONTCAR. Delimiter line number is dependent on the use of selective dynamics. "9" if selective dynamics and "8" if not.
+        
+        Args:
+            None
+        Returns:
+            header (list[str]): contains list containing header from CONTCAR
+            ionic positions (list[str]): contains all ionic positions of atoms within the surface
+        """
         line_delimiter: int = 0
-        if content[7].lower().startswith('s'):
+        if self.content[7].lower().startswith('s'):
             line_delimiter = 9
         else:
             line_delimiter = 8
         
-        return content[:line_delimiter], content[line_delimiter:]
+        return self.content[:line_delimiter], self.content[line_delimiter:]
+
+    def find_box_dim(self) -> None:
+        if self.atomic_data[-1].lower().startswith('d'):
+            self.box_dim = [1, 1, 1]
+        else:
+            print("Please use fractional coordinates.")
+            sys.exit()
 
     def clean_xyz_data(self) -> None:
+        """
+        Removes selective dynamics tags.
+        Args:
+            None
+        Side Effects:
+            Adds coordinates attribute to ContcarClass.
+        Returns:
+            None
+        """
         self.coordinates: list[list[float]] = []
         for i, line in enumerate(self.xyz):
             self.coordinates.append(list(map(float, line.split()[0:3])))
 
     def parse_atomic_data(self) -> None:
+        """
+        Parses atomic types and numbers of each atom type as well as a comined atom dictionary that contains atoms that are repeated in both the surface and 
+        Args:
+            None
+        Side Effects:
+            Adds types, nums and types_nums to the class attributes of ContcarClass.
+            types (list[str]): contains a list of all atom types of atoms in the surface
+            nums (list[str]): contains number of all 
+        Returns:
+            None
+        """
         self.types: list[str] = self.atomic_data[5].split()
         self.nums: list[int] = list(map(int, self.atomic_data[6].split()))
         combined: list[tuple[str, int]] = list(zip(self.types, self.nums))
@@ -112,6 +148,11 @@ class ContcarClass:
         return '\n'.join(['\n'.join(self.atomic_data[:5]), types_line, nums_line, self.atomic_data[7], self.atomic_data[8], '\n'.join(self.xyz)])
     
     def find_relax_atoms(self) -> None:
+        
+        total_atoms: int = sum(self.nums)
+        ads_atoms: int = sum(self.nums[-self.num_ads:])
+        surf_total = total_atoms - ads_atoms - 1
+
         self.relax_atoms: dict[int, tuple[str, str, int]] = {}
         data = tuple(zip(self.types, list(accumulate(self.nums))))
         atom_index = 0
@@ -123,8 +164,31 @@ class ContcarClass:
                 while atom >= data[atom_index][1]:
                     prev_end = data[atom_index][1]
                     atom_index += 1
+            if atom > surf_total:
+                self.relax_atoms[atom] = (data[atom_index][0], '_ads' ,atom - prev_end + 1)
+            else:
                 self.relax_atoms[atom] = (data[atom_index][0], '' ,atom - prev_end + 1)
-            
+
+    def find_all_atom(self) -> None:
+
+        total_atoms: int = sum(self.nums)
+        ads_atoms: int = sum(self.nums[-self.num_ads:])
+        surf_total = total_atoms - ads_atoms - 1
+
+        self.all_atoms: dict[int, tuple[str, str, int]] = {}
+        data = tuple(zip(self.types, list(accumulate(self.nums))))
+        atom_index = 0
+        prev_end = 0
+
+        for atom, coordinate in enumerate(self.xyz):
+            while atom >= data[atom_index][1]:
+                prev_end = data[atom_index][1]
+                atom_index += 1
+            if atom > surf_total:
+                self.all_atoms[atom] = (data[atom_index][0], '_ads' ,atom - prev_end + 1)
+            else:
+                self.all_atoms[atom] = (data[atom_index][0], '' ,atom - prev_end + 1)
+
 def check_unique_atom_atom_types(atom_list: list[str]) -> set:
     unique = set()
     for v in atom_list:
@@ -185,10 +249,10 @@ def populate_vasp_dirs(cur_dir: Path, contcar_path: Path, directory: Path, atom_
     fm.copy_file(contcar_path, directory / 'POSCAR')
 
 def write_calcfile(dir_path: Path, dir_list: list[Path]):
-    with open(dir_path / "CalcFile.dat", "w") as f:
+    with open(dir_path / 'CalcFile.dat', 'w') as f:
         total = 0
         for dir in dir_list:
             dir = str(dir)[len(str(dir_path)) + 1:]
             f.write(f"{dir}\n")
             total = total + 1
-    print(f"Total Directories made for {dir_path.name}:  {total}")
+    print(f'Total Directories made for {dir_path.name}:  {total}\nDirectory names entered into the CalcFile.dat')

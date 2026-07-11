@@ -3,12 +3,11 @@ A module that conducts all functions related to creating differential analysis f
 
 """
 
-
 #!/usr/bin/python3
-from shutil import copy2
+
+import argparse
 import pandas as pd
 from pathlib import Path
-import argparse
 from vasphelper import file_manager as fm
 from vasphelper import vasp_file_manager as vfm
 from typing import Any
