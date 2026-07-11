@@ -24,10 +24,6 @@ def sp_pbc_dist(point, point_list, L):
     dist_list: list[float] = []
 
     for pt in point_list:
-        print(point[0], pt[0])
-        print(point[1], pt[1])
-        print(point[2], pt[2])
-        c = input()
         x_dist: float = point[0] - pt[0]
         y_dist: float = point[1] - pt[1]
         z_dist: float = point[2] - pt[2]
@@ -36,7 +32,6 @@ def sp_pbc_dist(point, point_list, L):
         y_dist -= L[1] * round(y_dist/L[1])
         z_dist -= L[2] * round(z_dist/L[2])
 
-        print(x_dist * x_dist + y_dist * y_dist + z_dist * z_dist)
         dist_list.append(x_dist * x_dist + y_dist * y_dist + z_dist * z_dist)
 
     return dist_list
