@@ -30,7 +30,7 @@ def create_list_of_cases () -> list[str]:
     data = []
     for file in CUR_DIR.iterdir():
         file = file.name
-        if not (file.endswith(".vesta") or file.endswith(".png")):
+        if not (file.endswith(".vesta") or file.endswith(".png") or file.endswith('.vasp')):
             if file == "CONTCAR_CO2" or file.startswith("CONTCAR_CO2_0"):
                 pass
             elif file.startswith("CONTCAR") == True:
@@ -71,7 +71,7 @@ def get_rwigs_list(unique: set) -> pd.DataFrame:
                 print("Please enter only float values.")    
         rwigs_list = pd.DataFrame(index = list(unique))
         for ratio in ratios:    
-            col_name = f'Ratio_{str(ratio).replace('.', '_')}'
+            col_name = f'Ratio_{str(ratio).replace(".", "_")}'
             for entry in unique:
                 rwigs_def: float = 0.0
                 with open(CUR_DIR / f'POTCAR_{entry}' , 'r') as f:
@@ -88,7 +88,7 @@ def get_rwigs_list(unique: set) -> pd.DataFrame:
         rwigs_list.to_csv(CUR_DIR / 'RWIGS_inputs.csv')
     return rwigs_list
 
-def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
+def handle_pdos(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
     rwigs_list: pd.DataFrame = get_rwigs_list(unique_atoms)
     incar_parameter_dict['LORBIT'] = '0'
     dir_list: list[Path] = build_rwigs_dirs(case_list, dir_path, rwigs_data=list(rwigs_list.columns))
@@ -99,7 +99,7 @@ def handle_pdos(dir_path: Path, case_list: list[str], num_ads: int, incar_parame
         vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
-def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
+def handle_bader(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     incar_parameter_dict['LAECHG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
@@ -108,7 +108,7 @@ def handle_bader(dir_path: Path, case_list: list[str], num_ads: int, incar_param
         vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
-def handle_chg(dir_path: Path, case_list: list[str], num_ads: int, incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set):
+def handle_chg(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set):
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
     for directory in dir_list:
@@ -146,7 +146,7 @@ def run_diff_input_maker(calc_type: str, split_type: str, num_ads: int):
         unique_atoms = vfm.check_unique_atom_atom_types([item for sublist in atom_dict.values() for item in sublist])
         required_files += [f'POTCAR_{atom}' for atom in unique_atoms]
         fm.check_files(CUR_DIR, required_files)
-        dir_list = calc_handler(dir_path, case_list, num_ads, incar_parameter_dict, atom_dict, unique_atoms)
+        dir_list = calc_handler(dir_path, case_list, incar_parameter_dict, atom_dict, unique_atoms)
         fm.remove_files(dir_path, contcar_list)
         vfm.write_calcfile(dir_path, dir_list)
 

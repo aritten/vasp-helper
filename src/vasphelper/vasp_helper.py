@@ -114,11 +114,11 @@ def freeze_atoms() -> None:
         atom_freezer.run_freeze_atoms(filepath, 'zpos', zpos=zpos)
         
 DISPATCH: dict[str, Any]= {
-    "1": diff_input,
-    "2": icore_input,
-    "3": visualize_doscar,
-    "4": color_atoms,
-    "5": freeze_atoms,
+    "11": diff_input,
+    "12": icore_input,
+    "21": visualize_doscar,
+    "22": color_atoms,
+    "31": freeze_atoms,
     "0": exit
 }
     
@@ -167,18 +167,18 @@ Post Processing to Visualize Atoms in VESTA
 Enter number of the option of your choice from below to start program:\n""")    
 
     user_choice: str = get_choice(f"""{'-' * 15} File Creation Utilities {'-' * 16}
-1. Differential
-2. ICORE
+11. Differential
+12. ICORE
 
 {'-' * 15} Post Processing Utilities {'-' * 14}
-3. DOSCAR Visualization (In Progress)
-4. Color by ___ (In Progress)
+21. DOSCAR Visualization (In Progress)
+22. Color by ___ (In Progress)
 
 {'-' * 15} CONTCAR Utilities {'-' * 14}
-5. Define Relaxed and Static Layers for Single Files
+31. Define Relaxed and Static Layers for Single Files
 
 0. Exit Program
-Choice: """, ['1', '2', '3', '4', '5','0'])
+Choice: """, ['11', '12', '21', '22', '31','0'])
     handle_function(user_choice)
 
 if __name__ == "__main__":

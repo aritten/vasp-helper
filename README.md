@@ -36,7 +36,7 @@ I needed a tool to process large numbers of files quickly and reduce human error
 
 ## Installation
 
-Vasp-Helper can be installed on a computer with Python 3.10 and beyond.
+`vasp-helper` can be installed on a computer with Python 3.10 and beyond.
 
 To install, use
 ```

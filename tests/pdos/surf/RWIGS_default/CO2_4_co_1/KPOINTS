@@ -1,0 +1,5 @@
+B4C B11C-CBC
+0
+G            # Gamma centered Monkhorst-Pack grids
+4 4 1
+0.0 0.0 0.0  # No shift
