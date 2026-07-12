@@ -159,10 +159,10 @@ This program will not change KPOINTS make sure correct KPOINTS are specified in 
     ads_parser = subparsers.add_parser("ads", help="Runs file maker for surfaces with adsorbates.")
     ads_subparser = ads_parser.add_subparsers(dest="mode", required=True)
     ads_all = ads_subparser.add_parser("all", help="Use all atoms")
-    ads_all.add_argument("-n", "--num-ads", help="Specify the number of adsorbates species in CONTCAR. In original CONTCARs, make sure elements that occur in the surface and in the adsorbates are separated in header.", type=int, required = True)
+    ads_all.add_argument("num_ads", help="Specify the number of adsorbates species in CONTCAR. In original CONTCARs, make sure elements that occur in the surface and in the adsorbates are separated in header.", type=int, required = True)
     ads_partial = ads_subparser.add_parser("partial",  help="Use only selected atoms")
-    ads_partial.add_argument("-n", "--num-ads", help="Specify the number of adsorbates species in CONTCAR. In original CONTCARs, make sure elements that occur in the surface and in the adsorbates are separated in header.", type=int, required = True)
-    ads_partial.add_argument("-i", '--aoi', type = int, required = True)
+    ads_partial.add_argument("num_ads", help="Specify the number of adsorbates species in CONTCAR. In original CONTCARs, make sure elements that occur in the surface and in the adsorbates are separated in header.", type=int, required = True)
+    ads_partial.add_argument("aoi", help='Specify atom to make input files for surrounding atoms for.', type = int)
     ads_partial.add_argument("-s", "--num-surr-atoms", type = int, default=7)
 
     args = parser.parse_args()
