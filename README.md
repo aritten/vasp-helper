@@ -90,7 +90,7 @@ Run in folder with desired position file. It makes folders for all relaxed atoms
 - INCAR from geometry calculation
 - KPOINTS with correct accuracy for calculation type
 
-#### Bulk Unit Cell
+#### <ins>Bulk Unit Cell</ins>
 
 Makes files for all atoms within a bulk unit cell.
 
