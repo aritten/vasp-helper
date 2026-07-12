@@ -43,7 +43,7 @@ This tool can be used by calling `vasphelper` and navigating menu options to get
 
 ### Differential Input File Maker
 
-Run the program in the desired file location. This can be run for just surface `surf`, for just adsorbates `ads`, for both surface and ads `both` or for surface, ads and overall `all`.
+Run the program in the desired file location where CONTCARs are present. This can be run for just surface `surf`, for just adsorbates `ads`, for both surface and ads `both` or for surface, ads and overall `all`.
 
 **Required Files**
 - CONTCARs for each case
@@ -71,9 +71,42 @@ diffinputmaker pdos {ads, surf, both, all} {Number of adsorbate species in the u
 
 ### ICORE Input File Maker
 
-`icoreinputmaker
+Run in folder with desired position file. It makes folders for all relaxed atoms within the unit cell.
+
+#### Bulk Unit Cell
+
+```
+icoreinputmaker {filename} bulk
+```
+
+#### Surface
+
+```
+icoreinputmaker {filename} surf
+```
+
+#### Surface with Adsorbates
+
+There are two modes that can be used if you have a suface with adsorbates. The first mode makes input files for all relaxed atoms. The second mode makes input files for only atoms surrounding a choosen atom and its nearest neighbors of each species.
+
+If the `all` mode is choosen then specify:
+```
+icoreinputmaker {filename} ads all {Number of adsorbate species}
+```
+If the `partial` mode is choosen then specify:
+```
+icoreinputmaker {filename} ads partial {Number of adsorbate species} {Number of Choosen Atom}
+```
+**Optional Tags**
+
+`-s` `--num-surr-atoms` - Specifies the number of atoms from each specie surrounding the choosen atom that files should be made for.
 
 ### Atom Freezer
+
+Run in folder where desired position file is located. 
+
+**Required Files**
+- Position file in VASP format
 
 #### Freeze by layer
 ```
