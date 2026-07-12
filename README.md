@@ -41,17 +41,41 @@ Then, use pip to install vasp-helper and its dependencies.
 
 This tool can be used by calling `vasphelper` and navigating menu options to get all necessary information to run the program or indivdual functions can be called by entering their name into command line with all the required tags.
 
-**Differential Input File Maker**
+### Differential Input File Maker
 
-`diffinputmaker {}
+Run the program in the desired file location. This can be run for just surface `surf`, for just adsorbates `ads`, for both surface and ads `both` or for surface, ads and overall `all`.
 
-**ICORE Input File Maker**
+**Required Files**
+- CONTCARs for each case
+- POTCARs for each element with element name matching name in CONTCAR (ex: for La -> POTCAR_La)
+- INCAR from geometry calculation
+- KPOINTS with correct accuracy for calculation type
+
+#### Bader Charge
+
+```
+diffinputmaker bader {ads, surf, both, all} {Number of adsorbate species in the unit cell}
+```
+
+#### Charge Density
+
+```
+diffinputmaker chg {ads, surf, both, all} {Number of adsorbate species in the unit cell}
+```
+
+#### Charge Density
+
+```
+diffinputmaker pdos {ads, surf, both, all} {Number of adsorbate species in the unit cell}
+```
+
+### ICORE Input File Maker
 
 `icoreinputmaker
 
 ### Atom Freezer
 
-For a run that freezes by layer
+#### Freeze by layer
 ```
 atomfreezer {filename} layer {Number of Layers in Surface} {Number of relaxed layers}
 ```
@@ -60,6 +84,11 @@ atomfreezer {filename} layer {Number of Layers in Surface} {Number of relaxed la
 `-n` or `--num_ads` - Specifies the number of adsorbate species present in the surface
 
 `-t` or `--tolerance` - Specifies tolerance to determine the presence of a layer. Default value is 0.01.
+
+#### Freeze by z-position
+```
+atomfreezer {filename} zpos {z-position to freeze surface at}
+```
 
 ## Future Plans
 
