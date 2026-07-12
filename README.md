@@ -62,20 +62,23 @@ Run the program in the desired file location where CONTCARs are present. This ca
 - INCAR from geometry calculation
 - KPOINTS with correct accuracy for calculation type
 
-#### Bader Charge
+#### <ins>Bader Charge</ins>
 
+Makes files for Bader Charge Analysis.
 ```
 diffinputmaker bader {ads, surf, both, all} {Number of adsorbate species in the unit cell}
 ```
 
-#### Charge Density
+#### <ins>Charge Density</ins>
 
+Makes files for charge density analysis.
 ```
 diffinputmaker chg {ads, surf, both, all} {Number of adsorbate species in the unit cell}
 ```
 
-#### Electron Distribution
+#### <ins>Electron Distribution</ins>
 
+Makes files for electron distribution calculations.
 ```
 diffinputmaker pdos {ads, surf, both, all} {Number of adsorbate species in the unit cell}
 ```
@@ -98,28 +101,32 @@ Makes files for all atoms within a bulk unit cell.
 icoreinputmaker {filename} bulk
 ```
 
-#### Surface
+#### <ins>Surface</ins>
 
 Makes files for all relaxed atoms within a surface.
 ```
 icoreinputmaker {filename} surf
 ```
 
-#### Surface with Adsorbates
+#### <ins>Surface with Adsorbates</ins>
 
 There are two modes that can be used if you have a suface with adsorbates. The first mode makes input files for all relaxed atoms. The second mode makes input files for only atoms surrounding a choosen atom and its nearest neighbors of each species.
 
-##### All
+##### <ins>All</ins>
+
+Makes files for all relaxed atoms in the surface. 
 ```
 icoreinputmaker {filename} ads all {Number of adsorbate species}
 ```
-##### Partial
+##### <ins>Partial</ins>
+
+Makes files for only atoms around a specified atom.
 ```
 icoreinputmaker {filename} ads partial {Number of adsorbate species} {Number of Choosen Atom}
 ```
 **Optional Tags**
 
-`-s` `--num-surr-atoms` - Specifies the number of atoms from each specie surrounding the choosen atom that files should be made for.
+`-s` `--num-surr-atoms` - Specifies the number of atoms from each specie surrounding the choosen atom that files should be made for. Default is 7
 
 ### Atom Freezer
 
@@ -128,7 +135,7 @@ Run in folder where desired position file is located.
 **Required Files**
 - Position file in VASP format
 
-#### Freeze by Layer
+#### <ins>Freeze by Layer</ins>
 ```
 atomfreezer {filename} layer {Number of Layers in Surface} {Number of relaxed layers}
 ```
@@ -138,7 +145,7 @@ atomfreezer {filename} layer {Number of Layers in Surface} {Number of relaxed la
 
 `-t` or `--tolerance` - Specifies tolerance to determine the presence of a layer. Default value is 0.01.
 
-#### Freeze by z-position
+#### <ins>Freeze by z-position</ins>
 ```
 atomfreezer {filename} zpos {z-position to freeze surface at}
 ```
