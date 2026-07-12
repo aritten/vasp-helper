@@ -17,6 +17,17 @@ Additionally, it can be used to freeze atoms in CONTCAR by layer and z-position.
 - [Installation](#installation)
 - [Dependencies](#dependencies)
 - [Usage](#usage)
+    - [Differential Input File Maker](#differential-input-file-maker)
+        - [Bader Charge](#bader-charge)
+        - [Charge Density](#charge-density)
+        - [Electron Distribution](#electron-distribution)
+    - [ICORE Input File Maker](#icore-input-file-maker)
+        - [Bulk Unit Cell](#bulk-unit-cell)
+        - [Surface](#surface)
+        - [Surface with Adsorbates](#surface-with-adsorbates)
+    - [Atom Freezer](#atom-freezer)
+        - [Freeze by Layer](#freeze-by-layer)
+        - [Freeze by z-position](#freeze-by-z-position)
 - [Future Plans](#future-plans)
 
 ## Why?
@@ -63,7 +74,7 @@ diffinputmaker bader {ads, surf, both, all} {Number of adsorbate species in the 
 diffinputmaker chg {ads, surf, both, all} {Number of adsorbate species in the unit cell}
 ```
 
-#### Charge Density
+#### Electron Distribution
 
 ```
 diffinputmaker pdos {ads, surf, both, all} {Number of adsorbate species in the unit cell}
@@ -108,7 +119,7 @@ Run in folder where desired position file is located.
 **Required Files**
 - Position file in VASP format
 
-#### Freeze by layer
+#### Freeze by Layer
 ```
 atomfreezer {filename} layer {Number of Layers in Surface} {Number of relaxed layers}
 ```
