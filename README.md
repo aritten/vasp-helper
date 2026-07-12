@@ -84,7 +84,15 @@ diffinputmaker pdos {ads, surf, both, all} {Number of adsorbate species in the u
 
 Run in folder with desired position file. It makes folders for all relaxed atoms within the unit cell.
 
+**Required Files**
+- CONTCAR from geomentry calculation
+- POTCARs for each element with element name matching name in CONTCAR (ex: for La -> POTCAR_La)
+- INCAR from geometry calculation
+- KPOINTS with correct accuracy for calculation type
+
 #### Bulk Unit Cell
+
+Makes files for all atoms within a bulk unit cell.
 
 ```
 icoreinputmaker {filename} bulk
@@ -92,6 +100,7 @@ icoreinputmaker {filename} bulk
 
 #### Surface
 
+Makes files for all relaxed atoms within a surface.
 ```
 icoreinputmaker {filename} surf
 ```
@@ -100,11 +109,11 @@ icoreinputmaker {filename} surf
 
 There are two modes that can be used if you have a suface with adsorbates. The first mode makes input files for all relaxed atoms. The second mode makes input files for only atoms surrounding a choosen atom and its nearest neighbors of each species.
 
-If the `all` mode is choosen then specify:
+##### All
 ```
 icoreinputmaker {filename} ads all {Number of adsorbate species}
 ```
-If the `partial` mode is choosen then specify:
+##### Partial
 ```
 icoreinputmaker {filename} ads partial {Number of adsorbate species} {Number of Choosen Atom}
 ```
