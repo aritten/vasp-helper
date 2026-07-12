@@ -53,10 +53,43 @@ class ContcarClass:
         else:
             print("Please use fractional coordinates.")
             sys.exit()
+    
+    def write_out_select_tags(self, zpos):
+        for index, val in enumerate(self.coordinates):
+            coords = '  ' + '  '.join([f'{entry:.16f}' for entry in self.coordinates[index]])
+            if val[2] > zpos:
+                self.xyz[index] = coords + '   T   T   T'
+            else:
+                self.xyz[index] = coords + '   F   F   F'
+        
+        if not self.atomic_data[7].lower().startswith('s'):
+            self.atomic_data.insert(-1, 'Selective Dynamics')
+        up_pos_file = self.atomic_data + self.xyz
+
+        return '\n'.join(up_pos_file)
+
+
+    def freezer_by_layer(self, num_layers, relaxed_layers, tolerance):
+        surf_total: int = sum(self.nums[:self.num_ads + 1])
+        surf_atom_coords = self.coordinates[:surf_total]
+        num_surf_atom_coords = zip(range(1,surf_total+1), surf_atom_coords)
+
+        sort_by_z_pos = sorted(num_surf_atom_coords, key= lambda item: item[1][2])
+        sublayers = [0.0]
+        for i in range(1,len(sort_by_z_pos)):
+            diff = sort_by_z_pos[i][1][2] - sort_by_z_pos[i-1][1][2]
+            if diff > tolerance:
+                sublayers.append(diff/2 + sort_by_z_pos[i-1][1][2])
+        
+        sub_per_layer = len(sublayers) / num_layers
+        layers = sublayers[::int(sub_per_layer)][::-1]
+        split = layers[relaxed_layers-1]
+        print(f'Atoms relaxed above {split}')
+        return split
 
     def clean_xyz_data(self) -> None:
         """
-        Removes selective dynamics tags.
+        Removes True and False tags for freezing atoms within the unit cell.
         Args:
             None
         Side Effects:

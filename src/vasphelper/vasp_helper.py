@@ -3,6 +3,7 @@
 import argparse
 from vasphelper import diff_input_maker
 from vasphelper import icore_input_maker
+from vasphelper import atom_freezer
 from typing import Any
 from pathlib import Path
 
@@ -56,7 +57,7 @@ def icore_input() -> None:
         filename: str = input("Enter name of the CONTCAR to use: ")
         if 'CONTCAR' in filename and (Path.cwd() / filename).exists():
             break
-        print('Filename must contain CONTCAR and be in the currentworking directory.')
+        print('Filename must contain CONTCAR and be in the current working directory.')
 
     calc_type: str = get_choice(f"""
 Does the contcar contain adsorbates?
@@ -80,7 +81,6 @@ Choice: """, ['1', '2'])
         if not all_atoms_dict[all_atoms]: 
             spec_atom_num: int = get_choice_w_type("Enter the atom that directories for core level binding shifts are needed: ", int)
             num_surr_atoms: int = get_choice_w_type("Enter number of atoms around that atom that need to have directories: ", int)
-            tolerance: float = get_choice_w_type('Enter tolerance across periodic boundary to check for surrounding atoms: ', float)
             icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=True, num_surr_atoms=num_surr_atoms, aoi=spec_atom_num)
         else:
            icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=False) 
@@ -94,11 +94,31 @@ def visualize_doscar() -> None:
 def color_atoms() -> None:
     pass
 
+def freeze_atoms() -> None:
+    while True: 
+        filename: str = input("Enter name of the file to freeze atoms in: ")
+        if (Path.cwd() / filename).exists():
+            filepath = Path.cwd() / filename
+            break
+        print('File must exist and be in current working directory.')
+    
+    freeze_type: str = get_choice('What type of freeze do you want to do?\n1. By layer\n2. By z-position\nChoice: ', ['1', '2'])
+    if freeze_type == '1':
+        num_layers = get_choice_w_type("How many layers are contained in the unit cell: ", int)
+        relaxed_layers = get_choice_w_type("How many layers should be relaxed: ", int)
+        num_ads_present = get_choice_w_type("How many adsorbates species are present: ", int)
+        tolerance = get_choice_w_type("What tolerance should be used to split layers: ", float)
+        atom_freezer.run_freeze_atoms(filepath, 'layer', num_layer=num_layers, relaxed_layers=relaxed_layers, num_ads=num_ads_present, tolerance=tolerance)
+    else:
+        zpos = get_choice_w_type("What z-position do you want to freeze atoms below? ", float)
+        atom_freezer.run_freeze_atoms(filepath, 'zpos', zpos=zpos)
+        
 DISPATCH: dict[str, Any]= {
     "1": diff_input,
     "2": icore_input,
     "3": visualize_doscar,
     "4": color_atoms,
+    "5": freeze_atoms,
     "0": exit
 }
     
@@ -114,15 +134,19 @@ def handle_function(choice):
 def main():
     parser = argparse.ArgumentParser(description=f"""{'-'*60}
 A wrapper that handles the operation of several subroutines.
+                                     
 File Creation for Differential Analyses 
-- Bader Charge Analysis (In Progress)
-- Charge Differential Analysis (In Progress)
+- Bader Charge Analysis
+- Charge Differential Analysis
 - PDOS Electron Distribution Analysis
     - Allows for the definition of different shell sizes around atom's core for which to calculate the number of electrons in the shell
 
 File Creation for Core Level Binding Energy Shifts
-- Final State Approximation (In Progress)
+- Final State Approximation
 - Initial State Approximation (In Progress)
+
+Freezing atoms based on layers                                 
+                                    
 
 Post Processing to Visualize Atoms in VESTA
 - Bader Charge Analysis (In Progress)
@@ -144,14 +168,17 @@ Enter number of the option of your choice from below to start program:\n""")
 
     user_choice: str = get_choice(f"""{'-' * 15} File Creation Utilities {'-' * 16}
 1. Differential
-2. ICORE (In Progress)
+2. ICORE
 
 {'-' * 15} Post Processing Utilities {'-' * 14}
 3. DOSCAR Visualization (In Progress)
 4. Color by ___ (In Progress)
 
+{'-' * 15} CONTCAR Utilities {'-' * 14}
+5. Define Relaxed and Static Layers for Single Files
+
 0. Exit Program
-Choice: """, ['1', '2', '3', '4', '0'])
+Choice: """, ['1', '2', '3', '4', '5','0'])
     handle_function(user_choice)
 
 if __name__ == "__main__":

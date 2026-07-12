@@ -137,8 +137,9 @@ def run_icore_input_maker(filename: str, icore_type: str, num_ads: int, *, parti
     icore_handler(contcar, parameter_dict, partial=partial, num_surr_atoms=num_surr_atoms, aoi=aoi)
 
 def main():    
-    
+        
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description=f"""Creates files for core level binding energy calculations.
+
 In order to run this program, you need:
 {'-'*60}
 - CONTCARs for calculation in fractional coordinates
