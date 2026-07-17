@@ -4,6 +4,7 @@ import argparse
 from vasphelper import diff_input_maker
 from vasphelper import icore_input_maker
 from vasphelper import atom_freezer
+from vasphelper import atomic_data_visualizer
 from typing import Any
 from pathlib import Path
 
@@ -92,7 +93,26 @@ def visualize_doscar() -> None:
     pass
 
 def color_atoms() -> None:
-    pass
+    calc_type = get_choice("""
+Enter calculation type:
+1. Bader
+2. CLBES (in progress)
+3. PDOS (in progress)
+Choice: """,['1', '2', '3'])
+    calc_type_dict = {
+        '1': 'bader',
+        '2': 'clbes',
+        '3': 'pdos'
+    }
+
+    mode = get_choice("""
+Enter mode of coloring:
+1. All
+2. By atom type
+3. Differential 
+Choice: """,['1', '2', '3'])
+    width = get_choice_w_type('Increment width: ', float)
+    atomic_data_visualizer.run_atomic_data_visualizer(calc_type_dict[calc_type], mode, width = width)
 
 def freeze_atoms() -> None:
     while True: 
@@ -167,7 +187,7 @@ Post Processing to Visualize Atoms in VESTA
 Enter number of the option of your choice from below to start program:\n""")    
 
     user_choice: str = get_choice(f"""{'-' * 15} File Creation Utilities {'-' * 16}
-11. Differential
+11. Differential Analysis
 12. ICORE
 
 {'-' * 15} Post Processing Utilities {'-' * 14}
