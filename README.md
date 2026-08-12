@@ -160,7 +160,7 @@ atomfreezer {filename} zpos {z-position to freeze surface at}
 ```
 ### Data Plotter
 
-Run in folder where desired position file is located. 
+Run in folder where required files are located. 
 
 #### <ins>Plot XPS</ins>
 
@@ -197,7 +197,7 @@ dataplotter dos
 
 ### Atomic Data Visualizer
 
-Run in folder where desired position file is located. 
+Run in folder where required files are located. 
 
 #### <ins>Visualize CLBES</ins>
 
