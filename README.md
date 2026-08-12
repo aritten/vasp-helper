@@ -31,8 +31,10 @@ Additionally, it can be used to freeze atoms in CONTCAR by layer and z-position.
     - [Data Plotter](#data-plotter)
         - [Plot XPS](#plot-xps)
         - [Plot DOS](#plot-dos)
-    
-
+    -[Atomic Data Visualizer](#atomic-data-visualizer)
+        - [Visualize CLBE](#visualize-clbes)
+        - [Visualize PDOS](#visualize-pdos)
+        - [Visualize Bader Charge](#visualize-bader-charge)
 - [Future Plans](#future-plans)
 
 ## Why?
@@ -256,6 +258,6 @@ This program is a work in progress and the following functions will be added:
     * Create large throughput geometry optimziation  
 * Add functionality to allow for post-processing steps
     * Plot PDOS
-    * Allow for atoms be colored for Atomic Data Visualizer by differences between case and reference case and by atom type.
+    * Allow for atoms be colored for Atomic Data Visualizer by differences between case and reference case and by atom type
 
 Besides functionality, the code will be continuously improved upon to create the best user experience possible.
