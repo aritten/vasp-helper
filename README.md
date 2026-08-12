@@ -165,7 +165,9 @@ Run in folder where desired position file is located.
 #### <ins>Plot XPS</ins>
 
 Solves the following equation:
-$$CLBE = (E_{n-1}- E_{surface}) - (E_{n-1}_{ref} - E_{surf}) + E_{experimental}$$
+```math
+CLBE = (E_{n-1}- E_{surface}) - (E_{n-1}_{ref} - E_{surf}) + E_{experimental}
+```
 where $E_{n-1}$ is the final approximation energy, $E_{surf}$ is the surface energy after geometry optimization, $E_{n-1}_{ref} is the reference final approximation energy and $E_{experimental}$ is the experimental energy shift. 
 
 Convolutes spectra using Gaussians broadened by user inputted value of `{Gaussian Broadening Width}`
