@@ -166,7 +166,7 @@ Run in folder where desired position file is located.
 
 Solves the following equation:
 ```math
-CLBE = (E_{n-1}- E_{surface}) - (E_{n-1}_{ref} - E_{surf}) + E_{experimental}
+CLBE = (E_{n-1}- E_{surface}) - (E_{n-1_{ref}} - E_{surf}) + E_{experimental}
 ```
 where $E_{n-1}$ is the final approximation energy, $E_{surf}$ is the surface energy after geometry optimization, $E_{n-1}_{ref} is the reference final approximation energy and $E_{experimental}$ is the experimental energy shift. 
 
