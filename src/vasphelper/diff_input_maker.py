@@ -12,6 +12,7 @@ from vasphelper import file_manager as fm
 from vasphelper import vasp_file_manager as vfm
 from typing import Any
 from sys import exit
+import time
 
 #####CONSTANTS######
 
@@ -30,11 +31,11 @@ def create_list_of_cases () -> list[str]:
     data = []
     for file in CUR_DIR.iterdir():
         file = file.name
-        if not (file.endswith(".vesta") or file.endswith(".png") or file.endswith('.vasp')):
-            if file == "CONTCAR_CO2" or file.startswith("CONTCAR_CO2_0"):
+        if not (file.endswith('.vesta') or file.endswith('.png') or file.endswith('.vasp')):
+            if file.startswith('ref_') == True:
                 pass
-            elif file.startswith("CONTCAR") == True:
-                data.append(file.removeprefix("CONTCAR_"))
+            elif file.startswith('CONTCAR') == True:
+                data.append(file.removeprefix('CONTCAR_'))
     return data
 
 def build_dirs(case_list: list[str], dir_path: Path) -> list[Path]:
@@ -58,7 +59,6 @@ def build_rwigs_dirs(case_list: list[str], dir_path: Path, rwigs_data: list[str]
     return dir_list
 
 def get_rwigs_list(unique: set) -> pd.DataFrame:
-    # This function needs to be improved
     try:
         return pd.DataFrame(pd.read_csv(CUR_DIR / 'RWIGS_inputs.csv', index_col= 'Type'))
     except FileNotFoundError:
@@ -88,7 +88,7 @@ def get_rwigs_list(unique: set) -> pd.DataFrame:
         rwigs_list.to_csv(CUR_DIR / 'RWIGS_inputs.csv')
     return rwigs_list
 
-def handle_pdos(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
+def handle_pdos(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, list[str]], unique_atoms: set) -> list[Path]:
     rwigs_list: pd.DataFrame = get_rwigs_list(unique_atoms)
     incar_parameter_dict['LORBIT'] = '0'
     dir_list: list[Path] = build_rwigs_dirs(case_list, dir_path, rwigs_data=list(rwigs_list.columns))
@@ -97,9 +97,10 @@ def handle_pdos(dir_path: Path, case_list: list[str], incar_parameter_dict: dict
         incar_parameter_dict['RWIGS']= ' '.join(str(rwigs_list[rwigs_dir.name].get(str(atom),'')) for atom in atom_list[directory.name])
         incar_parameter_dict['ROPT'] = f'{len(atom_list[directory.name])}*0.0005'
         vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
+    print(len(dir_list))
     return dir_list
 
-def handle_bader(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set) -> list[Path]:
+def handle_bader(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, list[str]], unique_atoms: set) -> list[Path]:
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     incar_parameter_dict['LAECHG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
@@ -108,7 +109,7 @@ def handle_bader(dir_path: Path, case_list: list[str], incar_parameter_dict: dic
         vfm.populate_vasp_dirs(CUR_DIR, dir_path / f'CONTCAR_{directory.name}', directory, list(atom_list[directory.name]), incar_parameter_dict)
     return dir_list
 
-def handle_chg(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, str], unique_atoms: set):
+def handle_chg(dir_path: Path, case_list: list[str], incar_parameter_dict: dict[str,str], atom_list: dict[str, list[str]], unique_atoms: set):
     incar_parameter_dict['LCHARG'] = '.TRUE.'
     dir_list: list[Path] = build_dirs(case_list, dir_path)
     for directory in dir_list:
@@ -133,25 +134,26 @@ def run_diff_input_maker(calc_type: str, split_type: str, num_ads: int):
         'INCAR',
         'KPOINTS',
     ]
-    #want to move the required files check out here somehow
+
     split_targets = SPLIT_DISPATCH[split_type]
     calc_handler = CALC_DISPATCH[calc_type]
 
-    diff_dir = dir_path = fm.check_dir(CUR_DIR / calc_type)
+    diff_dir: Path = fm.check_dir(CUR_DIR / f'{calc_type}_input')
     contcar_list = ["CONTCAR_" + case for case in case_list]
     for target in split_targets:
         print(f"Progress for {target}:")
-        dir_path = fm.check_dir(diff_dir / target)
+        dir_path: Path = fm.check_dir(diff_dir / target)
         atom_dict: dict[str, list[str]] = vfm.copy_contcars_diff(num_ads, case_list, dir_path, CUR_DIR)
-        unique_atoms = vfm.check_unique_atom_atom_types([item for sublist in atom_dict.values() for item in sublist])
+        unique_atoms: set[str] = vfm.check_unique_atom_atom_types([item for sublist in atom_dict.values() for item in sublist])
         required_files += [f'POTCAR_{atom}' for atom in unique_atoms]
         fm.check_files(CUR_DIR, required_files)
-        dir_list = calc_handler(dir_path, case_list, incar_parameter_dict, atom_dict, unique_atoms)
+        dir_list: list[Path] = calc_handler(dir_path, case_list, incar_parameter_dict, atom_dict, unique_atoms)
         fm.remove_files(dir_path, contcar_list)
         vfm.write_calcfile(dir_path, dir_list)
 
 
 def main():
+    start = time.time()
     parser = argparse.ArgumentParser(description=f"""Split CONTCAR into surface and adsorbant CONTCARs and makes files for one of the follow analyses:
 - Bader Charge
 - Charge Density
@@ -172,6 +174,8 @@ This program will not change KPOINTS make sure correct KPOINTS are specified in 
     args = parser.parse_args()
 
     run_diff_input_maker(args.calc_type, args.split_type, args.num_ads)
+    end = time.time()
+    print(end - start)
 
 if __name__ == '__main__':
     main()

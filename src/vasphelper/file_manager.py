@@ -20,11 +20,18 @@ def copy_file(src: Path, dst: Path) -> None:
     copyfile(src, dst)
 
 def check_dir(path: Path) -> Path:
-    # only needs to be done for outer most directory
     if path.exists():
-        rmtree(path)
+        if path.is_file():
+            path.unlink()
+        else:
+            try:
+                rmtree(path)
+            except PermissionError as exc:
+                raise PermissionError(
+                    f"Cannot remove existing directory {path}. It may be locked or in use."
+                ) from exc
     path.mkdir(parents=True, exist_ok=True)
-    return(path)
+    return path
 
 def remove_files(path: Path, file_list: list[str]):
     for file in file_list:

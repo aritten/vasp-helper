@@ -12,6 +12,7 @@ diffinputmaker = "vasphelper.diff_input_maker:main"
 icoreinputmaker = "vasphelper.icore_input_maker:main"
 atomfreezer = "vasphelper.atom_freezer:main"
 atomicdatavisualizer = "vasphelper.atomic_data_visualizer:main"
+dataplotter = "vasphelper.data_plotter:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

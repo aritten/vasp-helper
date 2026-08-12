@@ -1,12 +1,15 @@
 #!/usr/bin/python3
 
 import argparse
-from vasphelper import diff_input_maker
-from vasphelper import icore_input_maker
-from vasphelper import atom_freezer
-from vasphelper import atomic_data_visualizer
+from vasphelper import diff_input_maker as dim
+from vasphelper import icore_input_maker as iim
+from vasphelper import atom_freezer as af
+from vasphelper import atomic_data_visualizer as adv
+from vasphelper import data_plotter as dp
 from typing import Any
 from pathlib import Path
+
+######HELPER FUNCTIONS######
 
 def get_choice(prompt: str, choices: list) -> str:
     choice: str = input(prompt).strip()
@@ -16,6 +19,18 @@ def get_choice(prompt: str, choices: list) -> str:
         choice = input(f'Choice is not included in choices please select from the above list using the corresponding numbers included in: {", ".join(choices)}:\nChoice: ').strip()
     return choice
 
+def get_choice_list(prompt: str, choice_list: list):
+    choices = []
+    print('Which orbital would you like to represent? Press ' '. (s, p, d, f or t)')
+    while True:
+        choice = input()
+        if choice in choice_list:
+            choices.append(choice.lower().strip())
+        else:
+            print('Not in choice list. All previously entered choices have been recorded.')
+            break
+    return choices
+
 def get_choice_w_type(prompt: str, cast: Any) -> Any:
     while True:
         try:
@@ -23,6 +38,8 @@ def get_choice_w_type(prompt: str, cast: Any) -> Any:
             return choice
         except ValueError:
             print(f'Please enter input of type {cast}\nChoice: ')
+
+######INPUT FUNCTIONS######
 
 def diff_input() -> None:
     calc_type: str = get_choice(f"""
@@ -50,7 +67,7 @@ Choice: """, ['1', '2', '3', '4'])
     }
     #this might be best in subroutine
     num_ads: int = get_choice_w_type("Enter number of separate adsorbates in POSCAR list: ", int)
-    diff_input_maker.run_diff_input_maker(calc_type_dict[calc_type], split_type_dict[split_type], num_ads)
+    dim.run_diff_input_maker(calc_type_dict[calc_type], split_type_dict[split_type], num_ads)
 
 def icore_input() -> None:
 
@@ -82,37 +99,89 @@ Choice: """, ['1', '2'])
         if not all_atoms_dict[all_atoms]: 
             spec_atom_num: int = get_choice_w_type("Enter the atom that directories for core level binding shifts are needed: ", int)
             num_surr_atoms: int = get_choice_w_type("Enter number of atoms around that atom that need to have directories: ", int)
-            icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=True, num_surr_atoms=num_surr_atoms, aoi=spec_atom_num)
+            iim.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=True, num_surr_atoms=num_surr_atoms, aoi=spec_atom_num)
         else:
-           icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=False) 
+           iim.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads, partial=False) 
     else:
         num_ads: int = 0
-        icore_input_maker.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads)
+        iim.run_icore_input_maker(filename, calc_type_dict[calc_type], num_ads)
 
-def visualize_doscar() -> None:
-    pass
+def data_plotting() -> None:
+    calc_type = get_choice("""
+Enter graph type:
+1. XPS
+2. DOS
+3. PDOS (WIP)
+Choice: """, ['1', '2', '3'])
+    calc_type_dict = {
+        '1' : 'xps',
+        '2' : 'dos',
+        '3' : 'pdos'
+    }
+
+    orbitals = []
+    calc_kwargs = {}
+    if calc_type == '3':
+        print('This plotting function is still being made! Sorry for the inconvience!')
+        exit()
+        choice_list = ['s', 'p', 'd', 'f', 't']
+        orbitals = get_choice_list("""Which orbital would you like to represent? Press ' '. (s, p, d, f or t)""", choice_list)
+        calc_kwargs = {'col_list': orbitals}
+    elif calc_type == '1':
+        surf_energy = get_choice_w_type("What is the surface energy of the surface during the geometry optimization? ", float)
+        exp_energy = get_choice_w_type("What is the experimental shift to use? ", float)
+        ref_energy_exist = get_choice("""Do you have a reference energy to use?
+1: Yes
+2: No
+Choice: """, choices=['1', '2'])
+        if ref_energy_exist == '1':
+            ref_energy = get_choice_w_type('What is the reference energy? ', float)
+        else:
+            ref_energy = None
+        sigma = get_choice_w_type('What broadening value would you like to use? ', float)
+        calc_kwargs = {'surf_energy': surf_energy, 'ref_energy': ref_energy, 'exp_energy': exp_energy, 'sigma' : sigma}
+    print('\n')
+    dp.run_data_plotter(calc_type_dict[calc_type], **calc_kwargs)
+
 
 def color_atoms() -> None:
     calc_type = get_choice("""
 Enter calculation type:
 1. Bader
-2. CLBES (in progress)
-3. PDOS (in progress)
+2. CLBES
+3. PDOS
 Choice: """,['1', '2', '3'])
     calc_type_dict = {
         '1': 'bader',
         '2': 'clbes',
         '3': 'pdos'
     }
+    orbitals = []
+    calc_kwargs = {}
+    if calc_type == '3':
+        choice_list = ['s', 'p', 'd', 'f', 't']
+        orbitals = get_choice_list("""Which orbital would you like to represent? Press ' '. (s, p, d, f or t)""", choice_list)
+        calc_kwargs = {'col_list': orbitals}
+    elif calc_type == '2':
+        surf_energy = get_choice_w_type("What is the surface energy of the surface during the geometry optimization?", float)
+        exp_energy = get_choice_w_type("What is the experimental shift to use?", float)
+        ref_energy_exist = get_choice("""Do you have a reference energy to use?
+1: Yes
+2: No""", choices=['1', '2'])
+        if ref_energy_exist == '1':
+            ref_energy = get_choice_w_type('What is the reference energy?', float)
+        else:
+            ref_energy = None
+        calc_kwargs = {'surf_energy': surf_energy, 'e_ref': ref_energy, 'exp_energy': exp_energy}
+#     mode = get_choice("""
+# Enter mode of coloring:
+# 1. All
+# 2. By atom type
+# 3. Differential 
+# Choice: """,['1', '2', '3'])
 
-    mode = get_choice("""
-Enter mode of coloring:
-1. All
-2. By atom type
-3. Differential 
-Choice: """,['1', '2', '3'])
     width = get_choice_w_type('Increment width: ', float)
-    atomic_data_visualizer.run_atomic_data_visualizer(calc_type_dict[calc_type], mode, width = width)
+    adv.run_atomic_data_visualizer(calc_type_dict[calc_type], '1', width = width, **calc_kwargs) #ignore: typing
 
 def freeze_atoms() -> None:
     while True: 
@@ -128,15 +197,18 @@ def freeze_atoms() -> None:
         relaxed_layers = get_choice_w_type("How many layers should be relaxed: ", int)
         num_ads_present = get_choice_w_type("How many adsorbates species are present: ", int)
         tolerance = get_choice_w_type("What tolerance should be used to split layers: ", float)
-        atom_freezer.run_freeze_atoms(filepath, 'layer', num_layer=num_layers, relaxed_layers=relaxed_layers, num_ads=num_ads_present, tolerance=tolerance)
+        af.run_freeze_atoms(filepath, 'layer', num_layer=num_layers, relaxed_layers=relaxed_layers, num_ads=num_ads_present, tolerance=tolerance)
     else:
         zpos = get_choice_w_type("What z-position do you want to freeze atoms below? ", float)
-        atom_freezer.run_freeze_atoms(filepath, 'zpos', zpos=zpos)
-        
+        af.run_freeze_atoms(filepath, 'zpos', zpos=zpos)
+
+
+######DISPATCH FUNCTION######
+
 DISPATCH: dict[str, Any]= {
     "11": diff_input,
     "12": icore_input,
-    "21": visualize_doscar,
+    "21": data_plotting,
     "22": color_atoms,
     "31": freeze_atoms,
     "0": exit
@@ -151,6 +223,9 @@ def handle_function(choice):
         else:
             choice = input("Invalid Selection! Please select a choice from above.")
 
+
+######MAIN FUNCTION######
+
 def main():
     parser = argparse.ArgumentParser(description=f"""{'-'*60}
 A wrapper that handles the operation of several subroutines.
@@ -163,20 +238,21 @@ File Creation for Differential Analyses
 
 File Creation for Core Level Binding Energy Shifts
 - Final State Approximation
-- Initial State Approximation (In Progress)
 
-Freezing atoms based on layers                                 
-                                    
+Freezing atoms based on layers                                                                   
 
 Post Processing to Visualize Atoms in VESTA
-- Bader Charge Analysis (In Progress)
+- Bader Charge Analysis
     - Visualize Atoms as a function of Total Electrons
-- Core Level Binding Energy (In Progress)
+- Core Level Binding Energy
     - Visualize Atoms as a function of Core Level Binding Energies
-- PDOS Electron Distribution Analysis (In Progress)
+- PDOS Electron Distribution Analysis
     - Visualize Atoms as a function of Total Electrons in user defined shell
-- VESTA Viewport (In Progress)
-    - Normalizes view for all CONTCAR Files
+
+Plotting for
+- XPS Spectra
+- Density of States
+
 {'-'*60}
 """, formatter_class=argparse.RawTextHelpFormatter)
     args = parser.parse_args()
@@ -191,8 +267,8 @@ Enter number of the option of your choice from below to start program:\n""")
 12. ICORE
 
 {'-' * 15} Post Processing Utilities {'-' * 14}
-21. DOSCAR Visualization (In Progress)
-22. Color by ___ (In Progress)
+21. Data Plotting
+22. Atomic Data Visualization
 
 {'-' * 15} CONTCAR Utilities {'-' * 14}
 31. Define Relaxed and Static Layers for Single Files

@@ -15,6 +15,7 @@ class ContcarClass:
         self.raw_content: list[str] = [line.strip('\n') for line in fm.read_text(path)]
         self.content: list[str] = self.remove_velocity_data()
         self.atomic_data, self.xyz = self.split_atomic_data_and_ionic_pos()
+        self.total_atoms = len(self.xyz)
 
     def remove_velocity_data(self) -> list[str]:
         """
@@ -70,6 +71,15 @@ class ContcarClass:
 
 
     def freezer_by_layer(self, num_layers, relaxed_layers, tolerance):
+        """
+        Freezes postions of atoms based on layers in the unit cell.
+        Args:
+            num_layers: Number of layers witin unit cell
+            relaxed_layers: Number of relaxed layers
+            tolerance: The differnce in z-position that defines the border between one layer and another        
+        Returns:
+            split: the z coordinate at which atoms are frozen below and a relaxed above    
+        """
         surf_total: int = sum(self.nums[:self.num_ads + 1])
         surf_atom_coords = self.coordinates[:surf_total]
         num_surf_atom_coords = zip(range(1,surf_total+1), surf_atom_coords)
@@ -183,31 +193,29 @@ class ContcarClass:
     def find_relax_atoms(self) -> None:
         
         total_atoms: int = sum(self.nums)
-        ads_atoms: int = sum(self.nums[-self.num_ads:])
+        ads_atoms: int = sum(self.nums[-self.num_ads:]) if self.num_ads > 0 else 0
         surf_total = total_atoms - ads_atoms - 1
 
         self.relax_atoms: dict[int, tuple[str, str, int]] = {}
         data = tuple(zip(self.types, list(accumulate(self.nums))))
         atom_index = 0
         prev_end = 0
-    
         for atom, coordinate in enumerate(self.xyz):
             # this could be changed to provide context to xyz data
             if coordinate.endswith('T'):
                 while atom >= data[atom_index][1]:
                     prev_end = data[atom_index][1]
                     atom_index += 1
-            if atom > surf_total:
-                self.relax_atoms[atom] = (data[atom_index][0], '_ads' ,atom - prev_end + 1)
-            else:
-                self.relax_atoms[atom] = (data[atom_index][0], '' ,atom - prev_end + 1)
+                if atom > surf_total:
+                    self.relax_atoms[atom] = (data[atom_index][0], '_ads' ,atom - prev_end + 1)
+                else:
+                    self.relax_atoms[atom] = (data[atom_index][0], '' ,atom - prev_end + 1)
 
     def find_all_atom(self) -> None:
 
         total_atoms: int = sum(self.nums)
-        ads_atoms: int = sum(self.nums[-self.num_ads:])
+        ads_atoms: int = sum(self.nums[-self.num_ads:]) if self.num_ads > 0 else 0
         surf_total = total_atoms - ads_atoms - 1
-
         self.all_atoms: dict[int, tuple[str, str, int]] = {}
         data = tuple(zip(self.types, list(accumulate(self.nums))))
         atom_index = 0

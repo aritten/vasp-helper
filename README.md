@@ -28,6 +28,11 @@ Additionally, it can be used to freeze atoms in CONTCAR by layer and z-position.
     - [Atom Freezer](#atom-freezer)
         - [Freeze by Layer](#freeze-by-layer)
         - [Freeze by z-position](#freeze-by-z-position)
+    - [Data Plotter](#data-plotter)
+        - [Plot XPS](#plot-xps)
+        - [Plot DOS](#plot-dos)
+    
+
 - [Future Plans](#future-plans)
 
 ## Why?
@@ -149,6 +154,100 @@ atomfreezer {filename} layer {Number of Layers in Surface} {Number of relaxed la
 ```
 atomfreezer {filename} zpos {z-position to freeze surface at}
 ```
+### Data Plotter
+
+Run in folder where desired position file is located. 
+
+#### <ins>Plot XPS</ins>
+
+Solves the following equation:
+$$
+CLBE = (E_{n-1}- E_{surface}) - (E_{n-1}_{ref} - E_{surf}) + E_{experimental}
+$$
+where $E_{n-1}$ is the final approximation energy, $E_{surf}$ is the surface energy after geometry optimization, $E_{n-1}_{ref} is the reference final approximation energy and $E_{experimental}$ is the experimental energy shift. 
+
+Convolutes spectra using Gaussians broadened by user inputted value of `{Gaussian Broadening Width}`
+
+**Required Files**
+- Core Level Binding Shift Output File 'cbles_*.dat' (Created from clbes_job.sh in repositiory)
+
+```
+dataplotter xps {Surface Energy} {Gaussian Broadening Width}
+```
+**Optional Tags**
+
+`-e` or `--exp_energy` - Specifies the experimental energy shift. Default is 0.
+
+`-r` or `--ref_energy` - Specifies the reference energy for core level binding energy equation.
+
+#### <ins>Plot DOS</ins>
+
+Plots the Density of States and cubic spline of Density of States.
+
+**Required Files**
+- DOSCAR files for each case
+
+```
+dataplotter dos
+```
+
+### Atomic Data Visualizer
+
+Run in folder where desired position file is located. 
+
+#### <ins>Visualize CLBES</ins>
+
+Solves the following equation:
+$$
+CLBE = (E_{n-1}- E_{surface}) - (E_{n-1}_{ref} - E_{surf}) + E_{experimental}
+$$
+where $E_{n-1}$ is the final approximation energy, $E_{surf}$ is the surface energy after geometry optimization, $E_{n-1}_{ref} is the reference final approximation energy and $E_{experimental}$ is the experimental energy shift. 
+
+Colors atoms in .vesta file by binding energy values
+
+**Required Files**
+- Core Level Binding Shift Output File 'cbles_*.dat' for each Case (Created from clbes_job.sh in repositiory)
+- CONTCAR from VASP for each Case
+- CONTCAR.vesta for each Case
+- corelevel.csv with orbital information for each atom (example in tests)
+
+```
+atomicdatavisualizer all {Increment Width} clbes {Surface Energy}
+```
+**Optional Tags**
+
+`-e` or `--exp_energy` - Specifies the experimental energy shift. Default is 0.
+
+`-r` or `--ref_energy` - Specifies the reference energy for core level binding energy equation.
+
+#### <ins>Visualize PDOS</ins>
+
+Visualizes the number of electrons per choosen orbital for atoms in unit cell.
+
+**Required Files**
+- DOSCAR for each case
+- CONTCAR from VASP for each case
+- CONTCAR.vesta for each case
+
+```
+atomicdatavisualizer all {Increment Width} pdos
+```
+**Optional Tags**
+
+`-o` or `--orbitals` - Specifies orbitals to display in .vesta file. Default is 't' for total. Options 's', 'p', 'd', 'f' and 't'.
+
+#### <ins>Visualize Bader Charge</ins>
+
+Visualizes the charge for atoms in unit cell.
+
+**Required Files**
+- 'ACF.dat' for each case
+- CONTCAR from VASP for each case
+- CONTCAR.vesta for each case
+
+```
+atomicdatavisualizer all {Increment Width} bader
+```
 
 ## Future Plans
 
@@ -156,8 +255,7 @@ This program is a work in progress and the following functions will be added:
 * Add file creation functionality
     * Create large throughput geometry optimziation  
 * Add functionality to allow for post-processing steps
-    * Convolute core level binding shift data to produce theoretical XPS spectra
-    * Color atoms by core level binding energy, number of electrons and position within super cell
-    * Plot output of DOS and PDOS
+    * Plot PDOS
+    * Allow for atoms be colored for Atomic Data Visualizer by differences between case and reference case and by atom type.
 
 Besides functionality, the code will be continuously improved upon to create the best user experience possible.
