@@ -31,7 +31,7 @@ Additionally, it can be used to freeze atoms in CONTCAR by layer and z-position.
     - [Data Plotter](#data-plotter)
         - [Plot XPS](#plot-xps)
         - [Plot DOS](#plot-dos)
-    -[Atomic Data Visualizer](#atomic-data-visualizer)
+    - [Atomic Data Visualizer](#atomic-data-visualizer)
         - [Visualize CLBE](#visualize-clbes)
         - [Visualize PDOS](#visualize-pdos)
         - [Visualize Bader Charge](#visualize-bader-charge)
