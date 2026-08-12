@@ -54,6 +54,8 @@ Then, use pip to install vasp-helper and its dependencies.
 
 ## Dependencies
 * `pandas`
+* `scipy`
+* `numpy`
 
 ## Usage
 
